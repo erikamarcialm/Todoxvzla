@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todos x Vzla — Directorio de ayuda tras el terremoto</title>
+<meta name="description" content="Directorio centralizado de herramientas digitales creadas por la comunidad para apoyar el rescate y la recuperación tras el terremoto en Venezuela de junio 2026.">
+<meta property="og:title" content="Todos x Vzla — Directorio de ayuda">
+<meta property="og:description" content="Encuentra rápidamente la herramienta de la comunidad que necesitas: desaparecidos, hospitales, mascotas, voluntariado, daños estructurales, salud y donaciones verificadas.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%231d4ed8%22/><path d=%22M50 18 L82 42 L82 84 L60 84 L60 60 L40 60 L40 84 L18 84 L18 42 Z%22 fill=%22white%22/></svg>">
+<style>
+:root{
+  --bg:#f7f9fc;
+  --surface:#ffffff;
+  --border:#e2e8f0;
+  --ink:#0f1b2d;
+  --ink-soft:#475569;
+  --ink-faint:#94a3b8;
+  --blue:#1d4ed8;
+  --blue-deep:#13317a;
+  --blue-pale:#eaf1ff;
+  --amber:#f5a524;
+  --amber-pale:#fff6e0;
+  --green:#1b9c63;
+  --green-pale:#e7f8ef;
+  --radius-lg:18px;
+  --radius-md:12px;
+  --radius-sm:8px;
+  --shadow-sm:0 1px 2px rgba(15,27,45,.05);
+  --shadow-md:0 8px 24px rgba(15,27,45,.08);
+  --maxw:1280px;
+  --sidebar-w:268px;
+  color-scheme: light;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+a{color:inherit;}
+button{font-family:inherit;}
+:focus-visible{outline:3px solid var(--blue); outline-offset:2px; border-radius:6px;}
+
+/* ---------- Skip link ---------- */
+.skip-link{
+  position:absolute; left:-9999px; top:0; background:var(--blue); color:#fff;
+  padding:10px 16px; border-radius:0 0 8px 0; z-index:200; font-weight:600;
+}
+.skip-link:focus{left:0;}
+
+/* ---------- Top header ---------- */
+.topbar{
+  position:sticky; top:0; z-index:100;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:12px 20px;
+}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0;}
+.brand-mark{
+  width:38px; height:38px; border-radius:11px;
+  background:linear-gradient(135deg,var(--blue),var(--blue-deep));
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.brand-mark svg{width:20px; height:20px;}
+.brand-text{display:flex; flex-direction:column; line-height:1.05;}
+.brand-name{font-weight:800; font-size:17px; letter-spacing:-0.01em;}
+.brand-sub{font-size:11px; color:var(--ink-faint); font-weight:600; letter-spacing:.02em;}
+
+.update-badge{
+  margin-left:auto; display:flex; align-items:center; gap:8px;
+  background:var(--amber-pale); border:1px solid #f3d999;
+  padding:7px 14px; border-radius:999px; font-size:13px; white-space:nowrap;
+  flex-shrink:0;
+}
+.update-dot{
+  width:7px; height:7px; border-radius:50%; background:var(--green);
+  box-shadow:0 0 0 0 rgba(27,156,99,.6);
+  animation:pulse 2.2s infinite;
+  flex-shrink:0;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(27,156,99,.5);}
+  70%{box-shadow:0 0 0 6px rgba(27,156,99,0);}
+  100%{box-shadow:0 0 0 0 rgba(27,156,99,0);}
+}
+.update-badge strong{font-weight:700; color:var(--blue-deep);}
+
+.hero-strip{
+  max-width:var(--maxw); margin:0 auto; padding:22px 20px 6px;
+}
+.hero-strip h1{font-size:26px; margin:0 0 4px; letter-spacing:-0.01em;}
+.hero-strip p{margin:0; color:var(--ink-soft); font-size:15px; max-width:640px;}
+
+/* ---------- Layout ---------- */
+.layout{
+  max-width:var(--maxw); margin:0 auto;
+  padding:18px 20px 60px;
+}
+
+.main{flex:1; min-width:0; display:flex; flex-direction:column; gap:36px;}
+
+/* ---------- Quick access ---------- */
+.section-label{
+  display:flex; align-items:baseline; gap:10px; margin-bottom:14px;
+}
+.section-label h2{font-size:19px; margin:0; letter-spacing:-0.01em;}
+.section-label .count-chip{
+  font-size:12px; color:var(--ink-faint); font-weight:600;
+}
+.quick-grid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+}
+.quick-card{
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); padding:12px 14px;
+  cursor:pointer; text-align:left; transition:transform .12s, box-shadow .12s, border-color .12s;
+}
+.quick-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:#c7d8fb;}
+.qc-icon-wrap{display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.quick-card .qc-emoji{font-size:19px; line-height:1; flex-shrink:0;}
+.qc-text-row{display:flex; align-items:center; gap:8px; flex:1; min-width:0;}
+.quick-card .qc-title{font-weight:700; font-size:13.5px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.quick-card .qc-count{font-size:12px; color:var(--ink-faint); font-weight:600; flex-shrink:0; white-space:nowrap;}
+
+/* ---------- Category cards ---------- */
+.cat-list{display:flex; flex-direction:column; gap:12px;}
+.cat-card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+.cat-head{
+  display:flex; align-items:center; gap:14px;
+  width:100%; padding:18px 20px; border:none; background:none; text-align:left;
+}
+.cat-icon{
+  width:46px; height:46px; border-radius:12px; background:var(--blue-pale);
+  display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
+}
+.cat-headtext{flex:1; min-width:0;}
+.cat-headtext h3{margin:0 0 2px; font-size:16.5px;}
+.cat-headtext p{margin:0; font-size:13px; color:var(--ink-soft); line-height:1.4;}
+.cat-count{
+  font-size:12px; font-weight:700; color:var(--blue-deep);
+  background:var(--blue-pale); padding:5px 11px; border-radius:999px; white-space:nowrap; flex-shrink:0;
+}
+.cat-body-inner{padding:0 20px 20px;}
+.subgroup-title{
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--ink-faint); margin:14px 0 8px;
+}
+
+/* ---------- Resource cards ---------- */
+.res-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+.res-card{
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  padding:14px 16px; background:#fbfcfe; display:flex; flex-direction:column; gap:8px;
+  text-decoration:none; color:inherit; cursor:pointer;
+  transition:border-color .12s, box-shadow .12s, transform .12s;
+}
+.res-card:hover{border-color:#c7d8fb; box-shadow:var(--shadow-md); transform:translateY(-2px);}
+.res-top{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
+.res-title{font-weight:700; font-size:14.5px; line-height:1.3;}
+.res-thumb{
+  width:56px; height:56px; border-radius:8px; object-fit:cover;
+  border:1px solid var(--border); flex-shrink:0; background:#fff;
+}
+.res-url{
+  font-size:12px; color:var(--blue-deep); font-weight:600;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:-4px;
+}
+.res-desc{font-size:13px; color:var(--ink-soft); line-height:1.45; margin:0;}
+.res-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+.tag{
+  font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px;
+  background:#eef2f8; color:var(--ink-soft); white-space:nowrap;
+}
+.tag-status{display:inline-flex; align-items:center; gap:4px;}
+.tag-verified{background:var(--green-pale); color:#0e7a4d;}
+.tag-review{background:var(--amber-pale); color:#9a6b0a;}
+.tag-new{background:var(--blue-pale); color:var(--blue-deep);}
+.res-note{font-size:12px; color:var(--ink-faint); margin-top:2px;}
+
+/* ---------- Sources list ---------- */
+.sources-list{display:flex; flex-wrap:wrap; gap:8px;}
+.source-chip{
+  display:inline-flex; align-items:center;
+  font-size:13px; font-weight:600; color:var(--blue-deep);
+  background:var(--blue-pale); border:1px solid #c7d8fb;
+  padding:7px 14px; border-radius:999px; text-decoration:none;
+  transition:border-color .12s, transform .12s;
+}
+.source-chip:hover{border-color:var(--blue); transform:translateY(-1px);}
+
+/* ---------- Credits ---------- */
+.credits-box{
+  background:var(--blue-pale); border:1px solid #c7d8fb;
+  border-radius:var(--radius-lg); padding:22px 24px; font-size:14px; color:var(--blue-deep); line-height:1.6;
+}
+.credits-box p{margin:0;}
+.credits-box a{text-decoration:underline; font-weight:600;}
+.credits-warning{
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--amber-pale); border:1px solid #f3d999;
+  border-radius:var(--radius-md); padding:14px 16px; margin-top:16px;
+  color:#7a4e00; font-size:14px; line-height:1.5;
+}
+.credits-warning-icon{font-size:17px; flex-shrink:0; line-height:1.4;}
+
+/* ---------- Suggestions ---------- */
+.sugg-text{
+  max-width:640px; font-size:14.5px; color:var(--ink-soft); line-height:1.6;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:20px 24px;
+  box-shadow:var(--shadow-sm);
+}
+.sugg-text a{color:var(--blue-deep); font-weight:700; text-decoration:underline;}
+
+/* ---------- Loading / Error ---------- */
+.data-loading{
+  text-align:center; padding:60px 20px; color:var(--ink-faint);
+}
+.data-loading-spinner{
+  width:32px; height:32px; border-radius:50%; margin:0 auto 16px;
+  border:3px solid var(--border); border-top-color:var(--blue);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.data-error{
+  text-align:center; padding:48px 20px; color:var(--ink-soft);
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+}
+.data-error button{
+  margin-top:14px; padding:9px 20px; border-radius:9px;
+  border:none; background:var(--blue); color:#fff; cursor:pointer; font-size:14px;
+}
+
+/* ---------- Footer ---------- */
+footer{
+  border-top:1px solid var(--border); background:var(--surface);
+  padding:28px 20px; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.7;
+}
+footer strong{color:var(--ink-soft);}
+
+/* ---------- Back to top ---------- */
+.back-top{
+  position:fixed; bottom:22px; right:22px; z-index:90;
+  width:46px; height:46px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow-md);
+  opacity:0; transform:translateY(10px); pointer-events:none;
+  transition:opacity .2s, transform .2s;
+}
+.back-top.show{opacity:1; transform:translateY(0); pointer-events:auto;}
+
+/* ---------- Dark mode ---------- */
+[data-theme="dark"]{
+  --bg:#0b1220;
+  --surface:#121b2d;
+  --border:#243246;
+  --ink:#eef2f8;
+  --ink-soft:#aab8cc;
+  --ink-faint:#75839b;
+  --blue:#5285ff;
+  --blue-deep:#9cc0ff;
+  --blue-pale:#16223b;
+  --amber-pale:#2a2310;
+  --green-pale:#0f2a1f;
+}
+[data-theme="dark"] .topbar{background:rgba(11,18,32,.9);}
+[data-theme="dark"] .res-card{background:#0f1729;}
+[data-theme="dark"] .update-badge{border-color:#3a3115;}
+[data-theme="dark"] .tag{background:#1b2840;}
+
+.theme-toggle{
+  width:42px; height:42px; border-radius:10px; flex-shrink:0;
+  border:1px solid var(--border); background:var(--surface); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.theme-toggle svg{width:19px; height:19px;}
+.share-btn{
+  width:42px; height:42px; border-radius:10px; flex-shrink:0;
+  border:1px solid var(--border); background:var(--surface); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.share-btn svg{width:18px; height:18px;}
+.icon-btn-group{display:flex; gap:8px; flex-shrink:0;}
+
+/* ---------- Responsive ---------- */
+@media (max-width:980px){
+  .quick-grid{grid-template-columns:repeat(2,1fr);}
+  .res-grid{grid-template-columns:1fr;}
+}
+@media (max-width:860px){
+  .layout{padding-top:10px;}
+  .hero-strip h1{font-size:22px;}
+  .update-badge{font-size:12px; padding:6px 10px; margin-left:0; order:5; width:100%;}
+  .brand-sub{display:none;}
+  .topbar-inner{justify-content:flex-start;}
+  .icon-btn-group{margin-left:auto;}
+}
+@media (max-width:560px){
+  .quick-grid{grid-template-columns:1fr 1fr;}
+  .quick-card{
+    flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:6px; padding:14px 10px; min-height:auto;
+  }
+  .qc-icon-wrap{
+    width:32px; height:32px; border-radius:9px;
+    background:var(--blue-pale);
+  }
+  .quick-card .qc-emoji{font-size:16px;}
+  .qc-text-row{
+    flex:none; justify-content:center; align-items:baseline; gap:6px;
+  }
+  .quick-card .qc-title{
+    white-space:normal; text-overflow:initial; overflow:visible;
+    text-align:center; font-size:12.5px; line-height:1.25; flex:none; max-width:100%;
+  }
+  .quick-card .qc-count{
+    font-size:11px; background:var(--bg); padding:1px 7px; border-radius:999px; flex-shrink:0;
+  }
+  .topbar-inner{padding:10px 14px;}
+  .hero-strip,.layout{padding-left:14px; padding-right:14px;}
+  .sugg-text{padding:16px 18px;}
+}
+@media (max-width:420px){
+  .quick-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<a href="#contenido" class="skip-link">Saltar al contenido</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#contenido" class="brand">
+      <span class="brand-mark" style="display:none;">
+        <svg viewBox="0 0 100 100" fill="none"><path d="M50 14 L84 40 L84 86 L60 86 L60 58 L40 58 L40 86 L16 86 L16 40 Z" fill="white"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">Todos x Vzla</span>
+        <span class="brand-sub">Directorio comunitario de ayuda</span>
+      </span>
+    </a>
+    <div class="update-badge">
+      <span class="update-dot" aria-hidden="true"></span>
+      <span>Actualizado: <strong id="lastUpdated">—</strong></span>
+    </div>
+    <div class="icon-btn-group">
+      <button class="theme-toggle" id="themeToggle" aria-label="Cambiar a modo oscuro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <button class="share-btn" id="shareBtn" aria-label="Compartir esta página">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="hero-strip">
+  <h1>Directorio de ayuda · Terremoto Venezuela 2026</h1>
+  <p>Centralizamos —sin almacenar ni duplicar— las herramientas digitales que la comunidad ya construyó para buscar personas, coordinar ayuda y donar de forma segura.</p>
+</div>
+
+<div class="layout">
+  <main class="main" id="contenido">
+
+    <section id="accesos">
+      <div class="section-label"><h2>Accesos rápidos</h2></div>
+      <div class="quick-grid" id="quickGrid"></div>
+    </section>
+
+
+    <section id="organizacion">
+      <div class="section-label">
+        <h2>Categorías de ayuda</h2>
+        <span class="count-chip" id="totalCount"></span>
+      </div>
+      <div class="cat-list" id="catList"></div>
+    </section>
+
+    <section id="creditos">
+      <div class="section-label"><h2>Agradecimiento</h2></div>
+      <div class="credits-box">
+        <p>Agradecimiento profundo a las fuentes de difusión en redes, al pueblo y a los rescatistas de los diferentes países que han hecho esta labor posible. Este site no debe atribuirse a un bando político. Esta plataforma únicamente centraliza recursos creados por la comunidad. Todo el crédito pertenece a los autores de cada iniciativa.</p>
+        <div class="credits-warning">
+          <span class="credits-warning-icon" aria-hidden="true">⚠️</span>
+          <strong>Este site no busca ni buscará donaciones económicas de ningún medio.</strong>
+        </div>
+      </div>
+    </section>
+
+    <section id="fuentes">
+      <div class="section-label"><h2>Gracias por la información, difusión y apoyo</h2></div>
+      <div class="sources-list" id="sourcesList"></div>
+    </section>
+
+    <section id="sugerencias">
+      <div class="section-label"><h2>¿Tienes una sugerencia?</h2></div>
+      <p class="sugg-text">
+        Si quieres reportar un recurso, corregir un dato o sugerir una mejora para este sitio, escríbenos a
+        <a href="mailto:erikamarcialm@gmail.com?subject=Sugerencia%20para%20Todos%20x%20Vzla">erikamarcialm@gmail.com</a>.
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<button class="back-top" id="backTop" aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</button>
+
+<footer>
+  <div>Hecho con ❤️ por la comunidad venezolana — <strong>Todos x Vzla</strong></div>
+  <div>Este sitio no almacena información de personas afectadas. Su propósito es facilitar el acceso a las distintas iniciativas desarrolladas por la comunidad para apoyar la respuesta al terremoto de Venezuela 2026.</div>
+  <div>© 2026 Todos x Vzla</div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

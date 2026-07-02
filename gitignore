@@ -1,0 +1,12 @@
+# Node
+node_modules/
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Shots de desarrollo (no van al repo)
+shot_*.png
+*.png
