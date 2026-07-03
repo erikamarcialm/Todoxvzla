@@ -36,9 +36,9 @@
     const thumb  = `<img class="res-thumb" src="${ogImageUrl(r.url)}" alt="" loading="lazy" onerror="this.remove()">`;
     return `
       <a class="res-card" href="${r.url}" target="_blank" rel="noopener">
+        ${thumb}
         <div class="res-top">
           <div class="res-title">${r.title}</div>
-          ${thumb}
         </div>
         <div class="res-url">${r.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
         <p class="res-desc">${r.desc}</p>
