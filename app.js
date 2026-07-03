@@ -6,8 +6,7 @@
 (function () {
   "use strict";
 
-  // ── Última actualización (se sobreescribe con el valor de Sheets si existe) ──
-  const FALLBACK_UPDATED = "29 junio 2026, 11:45 (UTC-4)";
+  const FALLBACK_UPDATED = "3 julio 2026";
 
   const STATUS_LABEL = {
     verified: { label: "Verificado", cls: "tag-verified", dot: "🟢" },
@@ -15,35 +14,26 @@
     new:      { label: "Nuevo",       cls: "tag-new",      dot: "🔵" },
   };
 
-  // ── Estado global ──────────────────────────────────────────────────────────
-  let SITE_DATA = null; // { categories, resources, sources }
+  let SITE_DATA = null;
+  let activeFilter = "all"; // "all" o un cat id
 
   // ── Proxy de imagen OG ────────────────────────────────────────────────────
   function ogImageUrl(resourceUrl) {
     return `/api/og-image?url=${encodeURIComponent(resourceUrl)}`;
   }
 
-  // ── Recolectar recursos de una categoría (propios + multi-categoría) ──────
+  // ── Recursos de una categoría, ordenados por nº de categorías ─────────────
   function getResourcesForCategory(categoryId) {
-    const resources = SITE_DATA.resources.filter(r =>
-      r.categories.includes(categoryId)
-    );
-    // Primero los que aparecen en más categorías
-    return resources.sort((a, b) => b.categories.length - a.categories.length);
+    return SITE_DATA.resources
+      .filter(r => r.categories.includes(categoryId))
+      .sort((a, b) => b.categories.length - a.categories.length);
   }
 
-  // ── Contar recursos únicos por categoría (para accesos rápidos) ───────────
-  function countForCategory(categoryId) {
-    return SITE_DATA.resources.filter(r => r.categories.includes(categoryId)).length;
-  }
-
-  // ── Render de tarjeta de recurso ──────────────────────────────────────────
+  // ── Render de tarjeta ─────────────────────────────────────────────────────
   function renderResourceCard(r) {
     const status = STATUS_LABEL[r.status] || STATUS_LABEL.review;
-    const note = r.note ? `<div class="res-note">ℹ️ ${r.note}</div>` : "";
-    // La imagen se carga vía proxy; onerror la oculta si falla
-    const thumb = `<img class="res-thumb" src="${ogImageUrl(r.url)}" alt="" loading="lazy" onerror="this.remove()">`;
-
+    const note   = r.note ? `<div class="res-note">ℹ️ ${r.note}</div>` : "";
+    const thumb  = `<img class="res-thumb" src="${ogImageUrl(r.url)}" alt="" loading="lazy" onerror="this.remove()">`;
     return `
       <a class="res-card" href="${r.url}" target="_blank" rel="noopener">
         <div class="res-top">
@@ -53,8 +43,8 @@
         <div class="res-url">${r.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
         <p class="res-desc">${r.desc}</p>
         <div class="res-tags">
-          ${r.type    ? `<span class="tag">${r.type}</span>` : ""}
-          ${r.tag     ? `<span class="tag">${r.tag}</span>` : ""}
+          ${r.type     ? `<span class="tag">${r.type}</span>`     : ""}
+          ${r.tag      ? `<span class="tag">${r.tag}</span>`      : ""}
           ${r.subgroup ? `<span class="tag">${r.subgroup}</span>` : ""}
           <span class="tag tag-status ${status.cls}">${status.dot} ${status.label}</span>
         </div>
@@ -67,12 +57,11 @@
     const resources = getResourcesForCategory(category.id);
     if (!resources.length) return "";
 
-    // Agrupar por subgroup si algún recurso lo tiene
     const hasSubgroups = resources.some(r => r.subgroup);
     let bodyHtml = "";
 
     if (hasSubgroups) {
-      const groups = {};
+      const groups  = {};
       const noGroup = [];
       resources.forEach(r => {
         if (r.subgroup) {
@@ -82,9 +71,7 @@
           noGroup.push(r);
         }
       });
-      if (noGroup.length) {
-        bodyHtml += `<div class="res-grid">${noGroup.map(renderResourceCard).join("")}</div>`;
-      }
+      if (noGroup.length) bodyHtml += `<div class="res-grid">${noGroup.map(renderResourceCard).join("")}</div>`;
       Object.entries(groups).forEach(([name, items]) => {
         bodyHtml += `<div class="subgroup-title">${name}</div>
           <div class="res-grid">${items.map(renderResourceCard).join("")}</div>`;
@@ -109,40 +96,48 @@
       </div>`;
   }
 
-  // ── Render de accesos rápidos ─────────────────────────────────────────────
-  function renderQuickAccess() {
-    const html = SITE_DATA.categories.map(c => `
-      <button class="quick-card" data-goto="${c.id}">
-        <span class="qc-icon-wrap"><span class="qc-emoji">${c.icon}</span></span>
-        <span class="qc-text-row">
-          <span class="qc-title">${c.title}</span>
-          <span class="qc-count">${countForCategory(c.id)}</span>
-        </span>
-      </button>`).join("");
-    document.getElementById("quickGrid").innerHTML = html;
+  // ── Render de pills de filtro ─────────────────────────────────────────────
+  function renderFilterPills() {
+    const wrap = document.getElementById("filterPills");
+    if (!wrap) return;
+
+    const todoPill = `<button class="filter-pill ${activeFilter === "all" ? "active" : ""}" data-filter="all">Todo</button>`;
+
+    const catPills = SITE_DATA.categories.map(c => {
+      const count = SITE_DATA.resources.filter(r => r.categories.includes(c.id)).length;
+      if (!count) return ""; // ocultar categorías vacías
+      return `<button class="filter-pill ${activeFilter === c.id ? "active" : ""}" data-filter="${c.id}">
+        ${c.icon} ${c.title}
+      </button>`;
+    }).join("");
+
+    wrap.innerHTML = todoPill + catPills;
   }
 
-  // ── Render de todas las categorías ───────────────────────────────────────
+  // ── Render principal ──────────────────────────────────────────────────────
   function renderAll() {
-    const total = SITE_DATA.resources.length;
-    const catCount = SITE_DATA.categories.length;
-    document.getElementById("totalCount").textContent =
-      `${total} recurso${total === 1 ? "" : "s"} en ${catCount} categorías`;
+    const categoriesToShow = activeFilter === "all"
+      ? SITE_DATA.categories
+      : SITE_DATA.categories.filter(c => c.id === activeFilter);
 
-    document.getElementById("catList").innerHTML =
-      SITE_DATA.categories.map(c => renderCategory(c)).join("");
+    const total = SITE_DATA.resources.length;
+    document.getElementById("totalCount").textContent =
+      `${total} recurso${total === 1 ? "" : "s"} en ${SITE_DATA.categories.length} categorías`;
+
+    const html = categoriesToShow.map(c => renderCategory(c)).join("");
+    document.getElementById("catList").innerHTML = html || `<div class="data-error"><p>No hay recursos en esta categoría todavía.</p></div>`;
   }
 
   // ── Render de fuentes ─────────────────────────────────────────────────────
   function renderSources() {
     const el = document.getElementById("sourcesList");
     if (!el || !SITE_DATA.sources?.length) return;
-    el.innerHTML = SITE_DATA.sources.map(s => `
-      <a class="source-chip" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>
-    `).join("");
+    el.innerHTML = SITE_DATA.sources.map(s =>
+      `<a class="source-chip" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`
+    ).join("");
   }
 
-  // ── Loading / Error state ─────────────────────────────────────────────────
+  // ── Loading / Error ───────────────────────────────────────────────────────
   function showLoading() {
     document.getElementById("catList").innerHTML = `
       <div class="data-loading">
@@ -159,16 +154,24 @@
       </div>`;
   }
 
-  // ── Navegación por scroll ─────────────────────────────────────────────────
-  function gotoSection(id) {
-    const target = document.getElementById(id);
-    if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
+  // ── Eventos ───────────────────────────────────────────────────────────────
   document.addEventListener("click", (e) => {
+    // Pills de filtro
+    const pill = e.target.closest("[data-filter]");
+    if (pill) {
+      activeFilter = pill.getAttribute("data-filter");
+      renderFilterPills();
+      renderAll();
+      // Scroll suave al listado
+      document.getElementById("organizacion")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    // Navegación legacy data-goto (accesos rápidos si quedan)
     const trigger = e.target.closest("[data-goto]");
-    if (trigger) gotoSection(trigger.getAttribute("data-goto"));
+    if (trigger) {
+      const target = document.getElementById(trigger.getAttribute("data-goto"));
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   });
 
   // ── Dark mode ─────────────────────────────────────────────────────────────
@@ -210,28 +213,19 @@
   window.addEventListener("scroll", () => {
     backTop.classList.toggle("show", window.scrollY > 480);
   });
-  backTop.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  backTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-  // ── Init: cargar datos desde Sheets vía Netlify Function ─────────────────
+  // ── Init ──────────────────────────────────────────────────────────────────
   async function init() {
     document.getElementById("lastUpdated").textContent = FALLBACK_UPDATED;
     showLoading();
-
     try {
       const res = await fetch("/api/sheets");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       SITE_DATA = await res.json();
-
       if (SITE_DATA.error) throw new Error(SITE_DATA.error);
-
-      // Actualizar badge de última actualización si viene del Sheet
-      if (SITE_DATA.lastUpdated) {
-        document.getElementById("lastUpdated").textContent = SITE_DATA.lastUpdated;
-      }
-
-      renderQuickAccess();
+      if (SITE_DATA.lastUpdated) document.getElementById("lastUpdated").textContent = SITE_DATA.lastUpdated;
+      renderFilterPills();
       renderAll();
       renderSources();
     } catch (err) {

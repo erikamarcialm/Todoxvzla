@@ -122,21 +122,30 @@ button{font-family:inherit;}
 .section-label .count-chip{
   font-size:12px; color:var(--ink-faint); font-weight:600;
 }
-.quick-grid{
-  display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+/* ---------- Filter pills ---------- */
+.filter-pills-wrap{
+  display:flex; flex-wrap:wrap; gap:8px;
+  padding:4px 0 8px;
 }
-.quick-card{
-  display:flex; align-items:center; gap:10px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-md); padding:12px 14px;
-  cursor:pointer; text-align:left; transition:transform .12s, box-shadow .12s, border-color .12s;
+.filter-pill{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:13px; font-weight:600; white-space:nowrap;
+  padding:7px 14px; border-radius:999px; cursor:pointer;
+  border:1.5px solid var(--border);
+  background:var(--surface); color:var(--ink-soft);
+  transition:border-color .12s, background .12s, color .12s, transform .1s;
+  font-family:inherit;
 }
-.quick-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:#c7d8fb;}
-.qc-icon-wrap{display:flex; align-items:center; justify-content:center; flex-shrink:0;}
-.quick-card .qc-emoji{font-size:19px; line-height:1; flex-shrink:0;}
-.qc-text-row{display:flex; align-items:center; gap:8px; flex:1; min-width:0;}
-.quick-card .qc-title{font-weight:700; font-size:13.5px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-.quick-card .qc-count{font-size:12px; color:var(--ink-faint); font-weight:600; flex-shrink:0; white-space:nowrap;}
+.filter-pill:hover{
+  border-color:var(--blue); color:var(--blue-deep);
+  transform:translateY(-1px);
+}
+.filter-pill.active{
+  background:var(--blue); border-color:var(--blue);
+  color:#fff;
+}
+[data-theme="dark"] .filter-pill.active{color:#fff;}
+
 
 /* ---------- Category cards ---------- */
 .cat-list{display:flex; flex-direction:column; gap:12px;}
@@ -306,7 +315,6 @@ footer strong{color:var(--ink-soft);}
 
 /* ---------- Responsive ---------- */
 @media (max-width:980px){
-  .quick-grid{grid-template-columns:repeat(2,1fr);}
   .res-grid{grid-template-columns:1fr;}
 }
 @media (max-width:860px){
@@ -318,32 +326,12 @@ footer strong{color:var(--ink-soft);}
   .icon-btn-group{margin-left:auto;}
 }
 @media (max-width:560px){
-  .quick-grid{grid-template-columns:1fr 1fr;}
-  .quick-card{
-    flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; gap:6px; padding:14px 10px; min-height:auto;
-  }
-  .qc-icon-wrap{
-    width:32px; height:32px; border-radius:9px;
-    background:var(--blue-pale);
-  }
-  .quick-card .qc-emoji{font-size:16px;}
-  .qc-text-row{
-    flex:none; justify-content:center; align-items:baseline; gap:6px;
-  }
-  .quick-card .qc-title{
-    white-space:normal; text-overflow:initial; overflow:visible;
-    text-align:center; font-size:12.5px; line-height:1.25; flex:none; max-width:100%;
-  }
-  .quick-card .qc-count{
-    font-size:11px; background:var(--bg); padding:1px 7px; border-radius:999px; flex-shrink:0;
-  }
+  .filter-pill{font-size:12px; padding:6px 11px;}
   .topbar-inner{padding:10px 14px;}
   .hero-strip,.layout{padding-left:14px; padding-right:14px;}
-  .sugg-text{padding:16px 18px;}
 }
 @media (max-width:420px){
-  .quick-grid{grid-template-columns:1fr 1fr;}
+  .filter-pill{font-size:11.5px; padding:5px 10px;}
 }
 </style>
 </head>
@@ -386,14 +374,12 @@ footer strong{color:var(--ink-soft);}
   <main class="main" id="contenido">
 
     <section id="accesos">
-      <div class="section-label"><h2>Accesos rápidos</h2></div>
-      <div class="quick-grid" id="quickGrid"></div>
+      <div class="filter-pills-wrap" id="filterPills" aria-label="Filtrar por categoría"></div>
     </section>
-
 
     <section id="organizacion">
       <div class="section-label">
-        <h2>Categorías de ayuda</h2>
+        <h2>Recursos</h2>
         <span class="count-chip" id="totalCount"></span>
       </div>
       <div class="cat-list" id="catList"></div>

@@ -2,60 +2,49 @@
  * netlify/functions/sheets.js
  * Lee datos desde Google Sheets para Todos x Vzla
  * -------------------------------------------------
- * Requiere las variables de entorno en Netlify:
- *   SHEET_ID  — el ID del Google Sheet (de la URL: /d/ESTE_ID/edit)
- *   SHEET_API_KEY — API Key de Google Cloud (solo lectura, sin OAuth)
- *
- * El Sheet debe tener dos hojas (tabs):
- *   - "resources": columnas definidas en COLUMNS abajo
- *   - "sources":   columnas A=label, B=url
- *
- * Caché: 2 minutos en CDN de Netlify.
+ * Columnas de la hoja "resources" (A–I + 29 checkboxes):
+ * A title | B url | C desc | D type | E status | F tag | G note | H subgroup
+ * I–AG: una columna por categoría (TRUE/FALSE checkbox)
  */
 
 const SHEET_ID = process.env.SHEET_ID;
-const API_KEY = process.env.SHEET_API_KEY;
+const API_KEY  = process.env.SHEET_API_KEY;
 
-// Las 10 categorías fijas del sitio (con sus IDs e íconos).
-// No se gestionan desde Sheets — son parte del código.
+// 29 categorías en el orden exacto de las columnas I–AG del Sheet
 const CATEGORIES = [
-  { id: "cat-desaparecidos",        icon: "🔎", title: "Personas desaparecidas",         desc: "Herramientas para registrar personas desaparecidas y confirmar personas localizadas." },
-  { id: "cat-hospitales",           icon: "🏥", title: "Personas en hospitales",          desc: "Buscadores de pacientes hospitalizados y personas identificadas en centros de salud." },
-  { id: "cat-mascotas-desaparecidas", icon: "🐶", title: "Mascotas desaparecidas",        desc: "Registro y búsqueda de mascotas perdidas." },
-  { id: "cat-insumos",              icon: "🤝", title: "Insumos y voluntariado",          desc: "Herramientas para coordinar ayuda, voluntarios, transporte e insumos." },
-  { id: "cat-danos",                icon: "🗺️", title: "Daños estructurales",             desc: "Mapas colaborativos para identificar edificios colapsados, zonas de riesgo y afectaciones." },
-  { id: "cat-oficios",              icon: "🏗️", title: "Producción y Oficios",            desc: "Personas y organizaciones que fabrican o coordinan recursos físicos." },
-  { id: "cat-traductores",          icon: "🌐", title: "Traductores",                     desc: "Voluntarios de traducción para facilitar la comunicación internacional." },
-  { id: "cat-salud",                icon: "🩺", title: "Salud",                           desc: "Atención médica presencial, remota y apoyo psicológico." },
-  { id: "cat-mascotas-apoyo",       icon: "🐾", title: "Organizaciones de mascotas",      desc: "Rescate, alimentación, atención veterinaria y refugio temporal." },
-  { id: "cat-donaciones",           icon: "❤️", title: "Donaciones",                      desc: "Canales oficiales y campañas verificadas para realizar donaciones." },
+  { id: "cat-desaparecidos",    icon: "🔎", title: "Desaparecidos",          desc: "Personas desaparecidas." },
+  { id: "cat-hospitalizados",   icon: "🏥", title: "Hospitalizados",          desc: "Personas hospitalizadas." },
+  { id: "cat-ninos",            icon: "🍼", title: "Protección de niños",     desc: "Protección y cuidado de niños." },
+  { id: "cat-acopio",           icon: "📦", title: "Acopio",                  desc: "Centros de acopio de insumos." },
+  { id: "cat-resguardo-personas", icon: "⛺️", title: "Resguardo",            desc: "Resguardo y refugio de personas." },
+  { id: "cat-mascotas",         icon: "🐾", title: "Mascotas",                desc: "Recursos generales de mascotas." },
+  { id: "cat-mascotas-perdidas",icon: "🐶", title: "Mascotas perdidas",       desc: "Mascotas perdidas y encontradas." },
+  { id: "cat-veterinarias",     icon: "🌡️", title: "Veterinarias gratuitas",  desc: "Veterinarias gratuitas." },
+  { id: "cat-resguardo",        icon: "🏠", title: "Resguardo mascotas",      desc: "Resguardo de mascotas." },
+  { id: "cat-acopio-mascotas",  icon: "🐱", title: "Acopio mascotas",         desc: "Centros de acopio para mascotas." },
+  { id: "cat-danos",            icon: "🗺️", title: "Daños",                   desc: "Daños estructurales." },
+  { id: "cat-servicios",        icon: "🛠️", title: "Servicios",               desc: "Productores y profesionales." },
+  { id: "cat-hurnos",           icon: "⚰️", title: "Hurnos/Cremación",        desc: "Servicios funerarios." },
+  { id: "cat-camas",            icon: "🛏️", title: "Camas",                   desc: "Productores de camas y literas." },
+  { id: "cat-ropa",             icon: "👕", title: "Ropa",                    desc: "Productores de ropa." },
+  { id: "cat-luces",            icon: "💡", title: "Luces",                   desc: "Productores de luces." },
+  { id: "cat-ferulas",          icon: "🦴", title: "Férulas 3D",              desc: "Productores de férulas 3D." },
+  { id: "cat-ferreterias",      icon: "🔧", title: "Ferreterías",             desc: "Ferreterías." },
+  { id: "cat-alimentacion",     icon: "🍳", title: "Alimentación",            desc: "Servicios de alimentación." },
+  { id: "cat-psicologos",       icon: "🧠", title: "Psicólogos",              desc: "Apoyo psicológico." },
+  { id: "cat-arquitectos",      icon: "🏗️", title: "Arquitectos",             desc: "Arquitectos e ingenieros." },
+  { id: "cat-transporte",       icon: "🚚", title: "Transporte",              desc: "Transportistas." },
+  { id: "cat-medicina",         icon: "💊", title: "Medicina",                desc: "Medicina y salud." },
+  { id: "cat-medicos",          icon: "👨‍⚕️", title: "Médicos",              desc: "Médicos voluntarios." },
+  { id: "cat-vacunacion",       icon: "💉", title: "Vacunación",              desc: "Centros de vacunación." },
+  { id: "cat-triaje",           icon: "🩺", title: "Triaje",                  desc: "Puntos de triaje." },
+  { id: "cat-rayosx",           icon: "🩻", title: "Rayos X",                 desc: "Rayos X." },
+  { id: "cat-clinicas",         icon: "🚑", title: "Clínicas gratuitas",      desc: "Clínicas gratuitas." },
+  { id: "cat-donaciones",       icon: "❤️", title: "Donaciones",              desc: "Donaciones verificadas." },
+  { id: "cat-internet",         icon: "📡", title: "Internet",                desc: "Satélites e Internet." },
 ];
 
-// Columnas de la hoja "resources" (en orden, de A a Q):
-// A  title
-// B  url
-// C  desc
-// D  type         (Instagram / GoFundMe / Netlify / ArcGIS / GlobalGiving / vacío)
-// E  status       (verified / review / new)
-// F  tag          (subcategoría para Producción y Oficios)
-// G  note         (nota aclaratoria)
-// H  subgroup     (nombre del subgrupo, ej "Caracas" en mascotas)
-// I  cat-desaparecidos     (TRUE/FALSE checkbox)
-// J  cat-hospitales        (TRUE/FALSE)
-// K  cat-mascotas-desaparecidas (TRUE/FALSE)
-// L  cat-insumos           (TRUE/FALSE)
-// M  cat-danos             (TRUE/FALSE)
-// N  cat-oficios           (TRUE/FALSE)
-// O  cat-traductores       (TRUE/FALSE)
-// P  cat-salud             (TRUE/FALSE)
-// Q  cat-mascotas-apoyo    (TRUE/FALSE)
-// R  cat-donaciones        (TRUE/FALSE)
-
-const CAT_COLS = [
-  "cat-desaparecidos", "cat-hospitales", "cat-mascotas-desaparecidas",
-  "cat-insumos", "cat-danos", "cat-oficios", "cat-traductores",
-  "cat-salud", "cat-mascotas-apoyo", "cat-donaciones",
-];
+const CAT_IDS = CATEGORIES.map(c => c.id);
 
 async function fetchSheet(sheetName) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
@@ -70,25 +59,20 @@ async function fetchSheet(sheetName) {
 
 function parseResources(rows) {
   if (!rows.length) return [];
-  // Saltar la primera fila (headers)
-  const data = rows.slice(1);
-
-  return data
-    .filter(r => r[0] && r[1]) // título y URL son obligatorios
+  return rows.slice(1)
+    .filter(r => r[0] && r[1])
     .map(r => {
-      const categories = CAT_COLS
-        .filter((_, i) => (r[8 + i] || "").toUpperCase() === "TRUE")
-        .map(id => id);
-
+      // Columnas I en adelante (índice 8+) = checkboxes de categorías
+      const categories = CAT_IDS.filter((_, i) => (r[8 + i] || "").toUpperCase() === "TRUE");
       return {
-        title: r[0] || "",
-        url: r[1] || "",
-        desc: r[2] || "",
-        type: r[3] || null,
-        status: r[4] || "review",
-        tag: r[5] || null,
-        note: r[6] || null,
-        subgroup: r[7] || null,
+        title:      r[0] || "",
+        url:        r[1] || "",
+        desc:       r[2] || "",
+        type:       r[3] || null,
+        status:     r[4] || "review",
+        tag:        r[5] || null,
+        note:       r[6] || null,
+        subgroup:   r[7] || null,
         categories,
       };
     });
@@ -106,38 +90,21 @@ exports.handler = async function () {
   if (!SHEET_ID || !API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: "Missing env vars",
-        hasSheetId: !!SHEET_ID,
-        hasApiKey: !!API_KEY,
-      }),
+      body: JSON.stringify({ error: "Missing env vars", hasSheetId: !!SHEET_ID, hasApiKey: !!API_KEY }),
     };
   }
 
   let resourceRows, sourceRows;
 
-  try {
-    resourceRows = await fetchSheet("resources");
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "resources failed: " + err.message }),
-    };
-  }
+  try { resourceRows = await fetchSheet("resources"); }
+  catch (err) { return { statusCode: 500, body: JSON.stringify({ error: "resources failed: " + err.message }) }; }
 
-  try {
-    sourceRows = await fetchSheet("sources");
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "sources failed: " + err.message }),
-    };
-  }
+  try { sourceRows = await fetchSheet("sources"); }
+  catch (err) { return { statusCode: 500, body: JSON.stringify({ error: "sources failed: " + err.message }) }; }
 
   try {
     const resources = parseResources(resourceRows);
-    const sources = parseSources(sourceRows);
-
+    const sources   = parseSources(sourceRows);
     return {
       statusCode: 200,
       headers: {
@@ -148,9 +115,6 @@ exports.handler = async function () {
       body: JSON.stringify({ categories: CATEGORIES, resources, sources }),
     };
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "parse failed: " + err.message }),
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: "parse failed: " + err.message }) };
   }
 };
