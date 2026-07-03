@@ -162,8 +162,6 @@
       activeFilter = pill.getAttribute("data-filter");
       renderFilterPills();
       renderAll();
-      // Scroll suave al listado
-      document.getElementById("organizacion")?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
     // Navegación legacy data-goto (accesos rápidos si quedan)
