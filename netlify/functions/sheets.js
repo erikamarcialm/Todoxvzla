@@ -59,8 +59,11 @@ const CAT_COLS = [
 
 async function fetchSheet(sheetName) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) throw new Error(`Sheets API error ${res.status} for ${sheetName}`);
+  const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Sheets API error ${res.status} for ${sheetName}: ${body.slice(0, 200)}`);
+  }
   const json = await res.json();
   return json.values || [];
 }
