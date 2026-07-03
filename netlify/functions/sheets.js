@@ -57,6 +57,31 @@ async function fetchSheet(sheetName) {
   return json.values || [];
 }
 
+async function fetchLastModified() {
+  // La API de Drive devuelve la fecha de última modificación del archivo
+  const url = `https://www.googleapis.com/drive/v3/files/${SHEET_ID}?fields=modifiedTime&key=${API_KEY}`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json.modifiedTime) return null;
+    // Formatear: "3 jul 2026, 14:32 (UTC-4)"
+    const date = new Date(json.modifiedTime);
+    // Ajustar a UTC-4
+    const utcMinus4 = new Date(date.getTime() - 4 * 60 * 60 * 1000);
+    const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    const d = utcMinus4.getUTCDate();
+    const m = meses[utcMinus4.getUTCMonth()];
+    const y = utcMinus4.getUTCFullYear();
+    const hh = String(utcMinus4.getUTCHours()).padStart(2,"0");
+    const mm = String(utcMinus4.getUTCMinutes()).padStart(2,"0");
+    return `${d} ${m} ${y}, ${hh}:${mm} (UTC-4)`;
+  } catch {
+    return null;
+  }
+}
+
+
 function parseResources(rows) {
   if (!rows.length) return [];
   return rows.slice(1)
@@ -103,8 +128,9 @@ exports.handler = async function () {
   catch (err) { return { statusCode: 500, body: JSON.stringify({ error: "sources failed: " + err.message }) }; }
 
   try {
-    const resources = parseResources(resourceRows);
-    const sources   = parseSources(sourceRows);
+    const resources    = parseResources(resourceRows);
+    const sources      = parseSources(sourceRows);
+    const lastUpdated  = await fetchLastModified();
     return {
       statusCode: 200,
       headers: {
@@ -112,7 +138,7 @@ exports.handler = async function () {
         "Cache-Control": "public, max-age=120, stale-while-revalidate=300",
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ categories: CATEGORIES, resources, sources }),
+      body: JSON.stringify({ categories: CATEGORIES, resources, sources, lastUpdated }),
     };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: "parse failed: " + err.message }) };

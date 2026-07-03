@@ -9,7 +9,7 @@
 <meta property="og:description" content="Encuentra rápidamente la herramienta de la comunidad que necesitas: desaparecidos, hospitales, mascotas, voluntariado, daños estructurales, salud y donaciones verificadas.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%231d4ed8%22/><path d=%22M50 18 L82 42 L82 84 L60 84 L60 60 L40 60 L40 84 L18 84 L18 42 Z%22 fill=%22white%22/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇻🇪</text></svg>">
 <style>
 :root{
   --bg:#f7f9fc;
@@ -32,7 +32,7 @@
   --shadow-md:0 8px 24px rgba(15,27,45,.08);
   --maxw:1280px;
   --sidebar-w:268px;
-  color-scheme: light;
+  color-scheme: light dark;
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -280,31 +280,28 @@ footer strong{color:var(--ink-soft);}
 }
 .back-top.show{opacity:1; transform:translateY(0); pointer-events:auto;}
 
-/* ---------- Dark mode ---------- */
-[data-theme="dark"]{
-  --bg:#0b1220;
-  --surface:#121b2d;
-  --border:#243246;
-  --ink:#eef2f8;
-  --ink-soft:#aab8cc;
-  --ink-faint:#75839b;
-  --blue:#5285ff;
-  --blue-deep:#9cc0ff;
-  --blue-pale:#16223b;
-  --amber-pale:#2a2310;
-  --green-pale:#0f2a1f;
+/* ---------- Dark mode (automático según sistema) ---------- */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b1220;
+    --surface:#121b2d;
+    --border:#243246;
+    --ink:#eef2f8;
+    --ink-soft:#aab8cc;
+    --ink-faint:#75839b;
+    --blue:#5285ff;
+    --blue-deep:#9cc0ff;
+    --blue-pale:#16223b;
+    --amber-pale:#2a2310;
+    --green-pale:#0f2a1f;
+  }
+  .topbar{background:rgba(11,18,32,.9);}
+  .res-card{background:#0f1729;}
+  .update-badge{border-color:#3a3115;}
+  .tag{background:#1b2840;}
+  .filter-pill.active{color:#fff;}
 }
-[data-theme="dark"] .topbar{background:rgba(11,18,32,.9);}
-[data-theme="dark"] .res-card{background:#0f1729;}
-[data-theme="dark"] .update-badge{border-color:#3a3115;}
-[data-theme="dark"] .tag{background:#1b2840;}
 
-.theme-toggle{
-  width:42px; height:42px; border-radius:10px; flex-shrink:0;
-  border:1px solid var(--border); background:var(--surface); cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-}
-.theme-toggle svg{width:19px; height:19px;}
 .share-btn{
   width:42px; height:42px; border-radius:10px; flex-shrink:0;
   border:1px solid var(--border); background:var(--surface); cursor:pointer;
@@ -346,7 +343,7 @@ footer strong{color:var(--ink-soft);}
         <svg viewBox="0 0 100 100" fill="none"><path d="M50 14 L84 40 L84 86 L60 86 L60 58 L40 58 L40 86 L16 86 L16 40 Z" fill="white"/></svg>
       </span>
       <span class="brand-text">
-        <span class="brand-name">Todos x Vzla</span>
+        <span class="brand-name">Directorio de ayuda para vzla</span>
         <span class="brand-sub">Directorio comunitario de ayuda</span>
       </span>
     </a>
@@ -355,9 +352,6 @@ footer strong{color:var(--ink-soft);}
       <span>Actualizado: <strong id="lastUpdated">—</strong></span>
     </div>
     <div class="icon-btn-group">
-      <button class="theme-toggle" id="themeToggle" aria-label="Cambiar a modo oscuro">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-      </button>
       <button class="share-btn" id="shareBtn" aria-label="Compartir esta página">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
       </button>
