@@ -103,7 +103,12 @@ exports.handler = async function () {
   if (!SHEET_ID || !API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Missing SHEET_ID or SHEET_API_KEY env vars" }),
+      body: JSON.stringify({ 
+        error: "Missing env vars",
+        hasSheetId: !!SHEET_ID,
+        hasApiKey: !!API_KEY,
+        sheetIdLength: (SHEET_ID || "").length
+      }),
     };
   }
 
