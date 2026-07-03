@@ -103,21 +103,35 @@ exports.handler = async function () {
   if (!SHEET_ID || !API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: "Missing env vars",
         hasSheetId: !!SHEET_ID,
         hasApiKey: !!API_KEY,
-        sheetIdLength: (SHEET_ID || "").length
       }),
     };
   }
 
-  try {
-    const [resourceRows, sourceRows] = await Promise.all([
-      fetchSheet("resources"),
-      fetchSheet("sources"),
-    ]);
+  let resourceRows, sourceRows;
 
+  try {
+    resourceRows = await fetchSheet("resources");
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "resources failed: " + err.message }),
+    };
+  }
+
+  try {
+    sourceRows = await fetchSheet("sources");
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "sources failed: " + err.message }),
+    };
+  }
+
+  try {
     const resources = parseResources(resourceRows);
     const sources = parseSources(sourceRows);
 
@@ -131,10 +145,9 @@ exports.handler = async function () {
       body: JSON.stringify({ categories: CATEGORIES, resources, sources }),
     };
   } catch (err) {
-    console.error("sheets function error:", err.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message }),
+      body: JSON.stringify({ error: "parse failed: " + err.message }),
     };
   }
 };
