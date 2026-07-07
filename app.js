@@ -33,17 +33,19 @@
   function renderResourceCard(r) {
     const note = r.note ? `<div class="res-note">ℹ️ ${r.note}</div>` : "";
 
-    // Punto 6: imagen manual del Sheet primero, si no → proxy OG
+    // Imagen: manual del Sheet primero, si no → proxy OG
     const imgSrc = r.image ? r.image : ogImageUrl(r.url);
     const thumb = `<img class="res-thumb" src="${imgSrc}" alt="" loading="lazy" onerror="this.remove()">`;
 
-    // Punto 4: si type contiene una URL de Instagram, renderizar como pill con ícono
+    // Si type es Instagram → pill con ícono y @handle
     let typePill = "";
     if (r.type) {
-      const igMatch = r.type.match(/instagram\.com\/([^/?]+)/i);
-      if (igMatch) {
+      const igMatch = r.type.match(/instagram\.com\/([^/?#\s]+)/i) ||
+                      r.type.match(/^@?([\w.]+)$/);
+      if (r.type.includes("instagram.com") && igMatch) {
         const handle = igMatch[1].replace(/^@/, "");
-        typePill = `<a class="tag tag-instagram" href="${r.type.startsWith("http") ? r.type : "https://instagram.com/" + handle}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+        const href = r.type.startsWith("http") ? r.type : `https://instagram.com/${handle}`;
+        typePill = `<a class="tag tag-instagram" href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
           <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
           @${handle}
         </a>`;
@@ -52,19 +54,26 @@
       }
     }
 
-    // Punto 2: URL limpia con ellipsis controlado
     const cleanUrl = r.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+    // Agrupar todos los pills juntos
+    const tagsPills = [
+      typePill,
+      r.tag      ? `<span class="tag">${r.tag}</span>`      : "",
+      r.subgroup ? `<span class="tag">${r.subgroup}</span>` : "",
+    ].filter(Boolean).join("");
 
     return `
       <a class="res-card" href="${r.url}" target="_blank" rel="noopener">
-        ${thumb}
-        <div class="res-title">${r.title}</div>
-        <div class="res-url">${cleanUrl}</div>
-        <p class="res-desc">${r.desc}</p>
-        <div class="res-tags">
-          ${typePill}
-          ${r.tag ? `<span class="tag">${r.tag}</span>` : ""}
+        <div class="res-card-top">
+          <div class="res-card-text">
+            <div class="res-title">${r.title}</div>
+            <div class="res-url">${cleanUrl}</div>
+          </div>
+          ${thumb}
         </div>
+        <p class="res-desc">${r.desc}</p>
+        ${tagsPills ? `<div class="res-tags">${tagsPills}</div>` : ""}
         ${note}
       </a>`;
   }
