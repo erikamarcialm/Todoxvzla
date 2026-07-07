@@ -31,22 +31,39 @@
 
   // ── Render de tarjeta ─────────────────────────────────────────────────────
   function renderResourceCard(r) {
-    const status = STATUS_LABEL[r.status] || STATUS_LABEL.review;
-    const note   = r.note ? `<div class="res-note">ℹ️ ${r.note}</div>` : "";
-    const thumb  = `<img class="res-thumb" src="${ogImageUrl(r.url)}" alt="" loading="lazy" onerror="this.remove()">`;
+    const note = r.note ? `<div class="res-note">ℹ️ ${r.note}</div>` : "";
+
+    // Punto 6: imagen manual del Sheet primero, si no → proxy OG
+    const imgSrc = r.image ? r.image : ogImageUrl(r.url);
+    const thumb = `<img class="res-thumb" src="${imgSrc}" alt="" loading="lazy" onerror="this.remove()">`;
+
+    // Punto 4: si type contiene una URL de Instagram, renderizar como pill con ícono
+    let typePill = "";
+    if (r.type) {
+      const igMatch = r.type.match(/instagram\.com\/([^/?]+)/i);
+      if (igMatch) {
+        const handle = igMatch[1].replace(/^@/, "");
+        typePill = `<a class="tag tag-instagram" href="${r.type.startsWith("http") ? r.type : "https://instagram.com/" + handle}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+          @${handle}
+        </a>`;
+      } else {
+        typePill = `<span class="tag">${r.type}</span>`;
+      }
+    }
+
+    // Punto 2: URL limpia con ellipsis controlado
+    const cleanUrl = r.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
     return `
       <a class="res-card" href="${r.url}" target="_blank" rel="noopener">
         ${thumb}
-        <div class="res-top">
-          <div class="res-title">${r.title}</div>
-        </div>
-        <div class="res-url">${r.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
+        <div class="res-title">${r.title}</div>
+        <div class="res-url">${cleanUrl}</div>
         <p class="res-desc">${r.desc}</p>
         <div class="res-tags">
-          ${r.type     ? `<span class="tag">${r.type}</span>`     : ""}
-          ${r.tag      ? `<span class="tag">${r.tag}</span>`      : ""}
-          ${r.subgroup ? `<span class="tag">${r.subgroup}</span>` : ""}
-          <span class="tag tag-status ${status.cls}">${status.dot} ${status.label}</span>
+          ${typePill}
+          ${r.tag ? `<span class="tag">${r.tag}</span>` : ""}
         </div>
         ${note}
       </a>`;
@@ -57,28 +74,7 @@
     const resources = getResourcesForCategory(category.id);
     if (!resources.length) return "";
 
-    const hasSubgroups = resources.some(r => r.subgroup);
-    let bodyHtml = "";
-
-    if (hasSubgroups) {
-      const groups  = {};
-      const noGroup = [];
-      resources.forEach(r => {
-        if (r.subgroup) {
-          if (!groups[r.subgroup]) groups[r.subgroup] = [];
-          groups[r.subgroup].push(r);
-        } else {
-          noGroup.push(r);
-        }
-      });
-      if (noGroup.length) bodyHtml += `<div class="res-grid">${noGroup.map(renderResourceCard).join("")}</div>`;
-      Object.entries(groups).forEach(([name, items]) => {
-        bodyHtml += `<div class="subgroup-title">${name}</div>
-          <div class="res-grid">${items.map(renderResourceCard).join("")}</div>`;
-      });
-    } else {
-      bodyHtml = `<div class="res-grid">${resources.map(renderResourceCard).join("")}</div>`;
-    }
+    const bodyHtml = `<div class="res-grid">${resources.map(renderResourceCard).join("")}</div>`;
 
     return `
       <div class="cat-card" id="${category.id}">
