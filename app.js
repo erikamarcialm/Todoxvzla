@@ -31,50 +31,44 @@
 
   // ── Render de tarjeta ─────────────────────────────────────────────────────
   function renderResourceCard(r) {
-    const note = r.note ? `<div class="res-note">ℹ️ ${r.note}</div>` : "";
-
     // Imagen: manual del Sheet primero, si no → proxy OG
     const imgSrc = r.image ? r.image : ogImageUrl(r.url);
-    const thumb = `<img class="res-thumb" src="${imgSrc}" alt="" loading="lazy" onerror="this.remove()">`;
+    const thumb = `<img class="res-thumb" src="${imgSrc}" alt="" loading="lazy" onerror="this.style.display='none'">`;
 
-    // Si type es Instagram → pill con ícono y @handle
+    // Instagram pill
     let typePill = "";
     if (r.type) {
-      const igMatch = r.type.match(/instagram\.com\/([^/?#\s]+)/i) ||
-                      r.type.match(/^@?([\w.]+)$/);
-      if (r.type.includes("instagram.com") && igMatch) {
-        const handle = igMatch[1].replace(/^@/, "");
+      if (r.type.includes("instagram.com")) {
+        const igMatch = r.type.match(/instagram\.com\/([^/?#\s]+)/i);
+        const handle = igMatch ? igMatch[1].replace(/^@/, "") : r.type;
         const href = r.type.startsWith("http") ? r.type : `https://instagram.com/${handle}`;
-        typePill = `<a class="tag tag-instagram" href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-          <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
-          @${handle}
-        </a>`;
+        typePill = `<a class="tag tag-instagram" href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>@${handle}</a>`;
       } else {
         typePill = `<span class="tag">${r.type}</span>`;
       }
     }
 
-    const cleanUrl = r.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-
-    // Agrupar todos los pills juntos
-    const tagsPills = [
+    // Todos los pills en un solo grupo
+    const allPills = [
       typePill,
       r.tag      ? `<span class="tag">${r.tag}</span>`      : "",
       r.subgroup ? `<span class="tag">${r.subgroup}</span>` : "",
+      r.note     ? `<span class="tag tag-note">ℹ️ ${r.note}</span>` : "",
     ].filter(Boolean).join("");
+
+    const cleanUrl = r.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
     return `
       <a class="res-card" href="${r.url}" target="_blank" rel="noopener">
-        <div class="res-card-top">
+        <div class="res-card-inner">
           <div class="res-card-text">
             <div class="res-title">${r.title}</div>
             <div class="res-url">${cleanUrl}</div>
+            <p class="res-desc">${r.desc}</p>
+            ${allPills ? `<div class="res-tags">${allPills}</div>` : ""}
           </div>
           ${thumb}
         </div>
-        <p class="res-desc">${r.desc}</p>
-        ${tagsPills ? `<div class="res-tags">${tagsPills}</div>` : ""}
-        ${note}
       </a>`;
   }
 
